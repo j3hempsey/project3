@@ -231,6 +231,7 @@ public class PriorityScheduler extends Scheduler {
 			this.thread = thread;
 
 			setPriority(priorityDefault);
+			Lib.debug(dbgSch, "[D] === Setting thread time: " + thread.toString() + " === [D]");
 			setTimeAdded(Machine.timer().getTime()); 		//set the threads time it was added
 		}
 
@@ -309,6 +310,7 @@ public class PriorityScheduler extends Scheduler {
 		public KThread getThread(){
 			return this.thread;
 		}
+
 		/** The thread with which this object is associated. */
 		protected KThread thread;
 
@@ -318,4 +320,6 @@ public class PriorityScheduler extends Scheduler {
 		/** The realative position to all threads in queue */
 		protected long timeAdded;
 	}
+	private static final char dbgSch = 's';
+
 }
