@@ -5,6 +5,7 @@ import nachos.machine.*;
 import java.util.TreeSet;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.ArrayList;
 
 /**
  * A scheduler that chooses threads based on their priorities.
@@ -129,8 +130,12 @@ public class PriorityScheduler extends Scheduler {
 	 * A <tt>ThreadQueue</tt> that sorts threads by priority.
 	 */
 	protected class PriorityQueue extends ThreadQueue {
+		//Sorted queue by priority
+		private ArrayList<ThreadState> queue;
+
 		PriorityQueue(boolean transferPriority) {
 			this.transferPriority = transferPriority;
+			queue = new ArrayList<ThreadState>();
 		}
 
 		public void waitForAccess(KThread thread) {
@@ -165,6 +170,38 @@ public class PriorityScheduler extends Scheduler {
 			// implement me (if you want)
 		}
 
+		public void addThread(ThreadState currentState){
+			if (queue.size() == 0) {
+				queue.add(currentState);	//nothing in queue just add it
+				return;
+			} 
+			ThreadState queuedState; 	
+			for (int i = 0; i < queue.size(); ++i){
+				queuedState = queue.get(i);
+				if ((currentState.getEffectivePriority() == queuedState.getEffectivePriority() && 	//Same effective priority so the one who
+					currentState.getTimeAdded() < queuedState.getTimeAdded()) || 	//Has been waiting the longest needs to be highest
+					currentState.getEffectivePriority() > queuedState.getEffectivePriority()) {		//Larger effective priority goes first
+					//belongs here
+					queue.add(i, currentState);
+					return;
+				}
+			}
+			//lowest priority add to end
+			queue.add(currentState);
+			return;
+		}
+
+		//Swaps two values in the tree 
+		private void swap(int index1, int index2){
+			ThreadState temp = queue.get(index1);
+			queue.set(index1, queue.get(index2));
+			queue.set(index2, temp);
+		}
+
+		public void sort(int start){
+			if (queue.size() <= 1) return;		//the queue is only one long thus sorted
+			
+		}
 		/**
 		 * <tt>true</tt> if this queue should transfer priority from waiting
 		 * threads to the owning thread.
@@ -190,6 +227,7 @@ public class PriorityScheduler extends Scheduler {
 			this.thread = thread;
 
 			setPriority(priorityDefault);
+			setTimeAdded(Machine.timer().getTime()); 		//set the threads time it was added
 		}
 
 		/**
@@ -239,6 +277,7 @@ public class PriorityScheduler extends Scheduler {
 		 */
 		public void waitForAccess(PriorityQueue waitQueue) {
 			// implement me
+			waitQueue.addThread(this);
 		}
 
 		/**
@@ -255,10 +294,19 @@ public class PriorityScheduler extends Scheduler {
 			// implement me
 		}
 
+		public void setTimeAdded(long time){
+			this.timeAdded = time;
+		}
+		public long getTimeAdded(){
+			return this.timeAdded;
+		}
 		/** The thread with which this object is associated. */
 		protected KThread thread;
 
 		/** The priority of the associated thread. */
 		protected int priority;
+
+		/** The realative position to all threads in queue */
+		protected long timeAdded;
 	}
 }
