@@ -290,7 +290,6 @@ public class PriorityScheduler extends Scheduler {
 		 * @see nachos.threads.ThreadQueue#waitForAccess
 		 */
 		public void waitForAccess(PriorityQueue waitQueue) {
-			// implement me
 			waitQueue.addThread(this);
 		}
 
@@ -305,7 +304,6 @@ public class PriorityScheduler extends Scheduler {
 		 * @see nachos.threads.ThreadQueue#nextThread
 		 */
 		public void acquire(PriorityQueue waitQueue) {
-			//Implement me
 			Lib.assertTrue(Machine.interrupt().disabled());
 			if (waitQueue.queue.size() > 0) { //just to be safe (probably don't need after debug verification)
 				waitQueue.queue.remove(thread); //since thread is acquired or nextThread() is invoked, remove that thread from waitQueue.
@@ -333,7 +331,9 @@ public class PriorityScheduler extends Scheduler {
 
 		/** The priority of the associated thread. */
 		protected int priority = priorityDefault;
-		protected int effectivePriority = priorityDefault;
+		
+		/** Donated priority to the thread */
+		protected int effectivePriority = 0;
 
 		/** The relative position to all threads in queue */
 		protected long timeAdded;
