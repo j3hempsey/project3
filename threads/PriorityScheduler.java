@@ -250,7 +250,17 @@ public class PriorityScheduler extends Scheduler {
 		 * @return the effective priority of the associated thread.
 		 */
 		public int getEffectivePriority() {
-			return priority;
+			//iterate through donation queue (if sorted, then it should be the first one in queue, but this is assuming it isn't)
+			if (PriorityDonateQ.size() > 0) {
+				for (int i = 0; i < PriorityDonateQ.get(0).queue.size(); ++i){ 
+					if (PriorityDonateQ.get(0).transferPriority) { //if transferPriority is true
+						if (PriorityDonateQ.get(i).queue.get(i).priority > effectivePriority) {
+							effectivePriority = PriorityDonateQ.get(i).queue.get(i).priority;
+						}
+					}
+				}
+			}
+			return effectivePriority;
 		}
 
 		/**
@@ -296,6 +306,14 @@ public class PriorityScheduler extends Scheduler {
 		 */
 		public void acquire(PriorityQueue waitQueue) {
 			//Implement me
+			Lib.assertTrue(Machine.interrupt().disabled());
+			if (waitQueue.queue.size() > 0) { //just to be safe (probably don't need after debug verification)
+				waitQueue.queue.remove(thread); //since thread is acquired or nextThread() is invoked, remove that thread from waitQueue.
+			}
+			if (PriorityDonateQ.size() > 0) {
+				PriorityDonateQ.remove(0); //remove previous
+			}
+			PriorityDonateQ.add(waitQueue); //add waitQueue for priority donation
 		}
 
 		public void setTimeAdded(long time){
@@ -315,9 +333,13 @@ public class PriorityScheduler extends Scheduler {
 
 		/** The priority of the associated thread. */
 		protected int priority = priorityDefault;
+		protected int effectivePriority = priorityDefault;
 
 		/** The relative position to all threads in queue */
 		protected long timeAdded;
+		
+		/** Create a queue for donating priority **/
+		protected ArrayList<PriorityQueue> PriorityDonateQ = new ArrayList<PriorityQueue>();
 	}
 	private static final char dbgSch = 's';
 
