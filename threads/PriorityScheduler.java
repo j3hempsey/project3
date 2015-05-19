@@ -151,7 +151,10 @@ public class PriorityScheduler extends Scheduler {
 		public KThread nextThread() {
 			Lib.assertTrue(Machine.interrupt().disabled());
 			// implement me
-			return null;
+			if (queue.size() == 0 || queue.get(0) == null) return null;
+			ThreadState next = queue.get(0);	//save next one to return 
+			queue.remove(0);					//remove the next one
+			return next.getThread();
 		}
 
 		/**
@@ -162,7 +165,8 @@ public class PriorityScheduler extends Scheduler {
 		 */
 		protected ThreadState pickNextThread() {
 			// implement me
-			return null;
+			if (queue.size() == 0 || queue.get(0) == null) return null;
+			return queue.get(0);
 		}
 
 		public void print() {
@@ -299,6 +303,11 @@ public class PriorityScheduler extends Scheduler {
 		}
 		public long getTimeAdded(){
 			return this.timeAdded;
+		}
+
+		//Returns the thread that has this state
+		public KThread getThread(){
+			return this.thread;
 		}
 		/** The thread with which this object is associated. */
 		protected KThread thread;
