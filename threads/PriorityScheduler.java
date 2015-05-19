@@ -206,11 +206,21 @@ public class PriorityScheduler extends Scheduler {
 			if (queue.size() <= 1) return;		//the queue is only one long thus sorted
 			
 		}
+
+		public void setLockedThread(KThread th){
+			lockedThread = th;
+		}
+
+		public KThread getLockedThread(){
+			return lockedThread;
+		}
 		/**
 		 * <tt>true</tt> if this queue should transfer priority from waiting
 		 * threads to the owning thread.
 		 */
 		public boolean transferPriority;
+
+		private KThread lockedThread;
 	}
 
 	/**
