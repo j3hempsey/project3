@@ -149,9 +149,9 @@ public class PriorityScheduler extends Scheduler {
 		});
 		Machine.interrupt().disable();
 		//ThreadedKernel.scheduler.setPriority(3);
-		//ThreadedKernel.scheduler.setPriority(thread1, 7);
-		//ThreadedKernel.scheduler.setPriority(thread2, 5);
-		//ThreadedKernel.scheduler.setPriority(thread3, 4);
+		ThreadedKernel.scheduler.setPriority(thread1, 5);
+		ThreadedKernel.scheduler.setPriority(thread2, 7);
+		ThreadedKernel.scheduler.setPriority(thread3, 4);
 		Machine.interrupt().enable();
 		
 		thread3.fork();
@@ -221,7 +221,7 @@ public class PriorityScheduler extends Scheduler {
 			for (int i = 0; i < queue.size(); ++i){
 				queuedState = queue.get(i);
 				if ((currentState.getEffectivePriority() == queuedState.getEffectivePriority() && 	//Same effective priority so the one who
-					currentState.getTimeAdded() < queuedState.getTimeAdded()) || 	//Has been waiting the longest needs to be highest
+					currentState.getTimeAdded() > queuedState.getTimeAdded()) || 	//Has been waiting the longest needs to be highest
 					currentState.getEffectivePriority() > queuedState.getEffectivePriority()) {		//Larger effective priority goes first
 					//belongs here
 					Lib.debug(dbgSch, "[D] === Adding thread to PriorityQueue(" + i + 
@@ -238,7 +238,7 @@ public class PriorityScheduler extends Scheduler {
 			for (int i = 0; i < queue.size(); ++i)
 			{
 				Lib.debug(dbgSch, "[D] === \t" + i +") "+queue.get(i).thread.toString() 
-				+ " === [D]");
+				+ " Priority: " +queue.get(i).getPriority() + " === [D]");
 			}
 			return;
 		}
@@ -310,7 +310,12 @@ public class PriorityScheduler extends Scheduler {
 					effectivePriority = priority; 		//if no transfering effective is just the priority
 				}
 			}
-			return effectivePriority;
+			if (priority > effectivePriority) { 
+				return priority;
+			}
+			else {
+				return effectivePriority;	
+			}
 		}
 
 		/**
@@ -321,7 +326,7 @@ public class PriorityScheduler extends Scheduler {
 		public void setPriority(int priority) {
 			if (this.priority == priority)
 				return;
-			Lib.debug(dbgSch, "[D] === Setting thread priority: " + thread.toString() + " === [D]");
+			Lib.debug(dbgSch, "[D] === Setting thread priority: " + thread.toString() + " to: " + priority + " === [D]");
 			this.priority = priority;
 
 			// implement me
