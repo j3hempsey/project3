@@ -252,12 +252,14 @@ public class PriorityScheduler extends Scheduler {
 		public int getEffectivePriority() {
 			//iterate through donation queue (if sorted, then it should be the first one in queue, but this is assuming it isn't)
 			if (PriorityDonateQ.size() > 0) {
-				for (int i = 0; i < PriorityDonateQ.get(0).queue.size(); ++i){ 
-					if (PriorityDonateQ.get(0).transferPriority) { //if transferPriority is true
+				if (PriorityDonateQ.get(0).transferPriority) { //if transferPriority is true
+					for (int i = 0; i < PriorityDonateQ.get(0).queue.size(); ++i){ 
 						if (PriorityDonateQ.get(i).queue.get(i).priority > effectivePriority) {
 							effectivePriority = PriorityDonateQ.get(i).queue.get(i).priority;
 						}
 					}
+				} else {
+					effectivePriority = priority; 		//if no transfering effective is just the priority
 				}
 			}
 			return effectivePriority;
