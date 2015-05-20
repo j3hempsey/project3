@@ -131,26 +131,25 @@ public class PriorityScheduler extends Scheduler {
 		/*
 		 * Creates 3 threads with different priorities and runs them
 		 */
-		System.out.println("Priority TEST #1: START");
+		System.out.println("PriorityQueue test: START");
 		KThread thread1 = new KThread(new Runnable(){
 			public void run(){
-				System.out.println("Im first to run");
+				System.out.println("1st thread to run");
 			}
 		});
 		KThread thread2 = new KThread(new Runnable(){
 			public void run(){
-				System.out.println("Im Second to run");
+				System.out.println("2nd thread to run");
 			}
 		});
 		KThread thread3 = new KThread(new Runnable(){
 			public void run(){
-				System.out.println("Im Third to run");
+				System.out.println("3rd thread to run");
 			}
 		});
 		Machine.interrupt().disable();
-		//ThreadedKernel.scheduler.setPriority(3);
-		ThreadedKernel.scheduler.setPriority(thread1, 5);
-		ThreadedKernel.scheduler.setPriority(thread2, 7);
+		ThreadedKernel.scheduler.setPriority(thread1, 7);
+		ThreadedKernel.scheduler.setPriority(thread2, 5);
 		ThreadedKernel.scheduler.setPriority(thread3, 4);
 		Machine.interrupt().enable();
 		
@@ -158,7 +157,7 @@ public class PriorityScheduler extends Scheduler {
 		thread2.fork();
 		thread1.fork();
 		KThread.yield();
-		System.out.println("Priority TEST #1: END");
+		System.out.println("PriorityQueue test: END");
 	}
 
 	/**
@@ -250,9 +249,14 @@ public class PriorityScheduler extends Scheduler {
 			queue.set(index2, temp);
 		}
 
-		public void sort(int start){
+		public void sort(){
 			if (queue.size() <= 1) return;		//the queue is only one long thus sorted
-			
+			for (int i = queue.size() - 1; i >= 0; --i){
+				for (int j = 0; j < i; ++j){
+					if (queue.get(j).getEffectivePriority() < queue.get(j + 1).getEffectivePriority()) 
+						swap(j, j+1);
+				}
+			}
 		}
 		/**
 		 * <tt>true</tt> if this queue should transfer priority from waiting
@@ -298,18 +302,6 @@ public class PriorityScheduler extends Scheduler {
 		 * @return the effective priority of the associated thread.
 		 */
 		public int getEffectivePriority() {
-			//iterate through donation queue (if sorted, then it should be the first one in queue, but this is assuming it isn't)
-			if (PriorityDonateQ.size() > 0) {
-				if (PriorityDonateQ.get(0).transferPriority) { //if transferPriority is true
-					for (int i = 0; i < PriorityDonateQ.get(0).queue.size(); ++i){ 
-						if (PriorityDonateQ.get(i).queue.get(i).priority > effectivePriority) {
-							effectivePriority = PriorityDonateQ.get(i).queue.get(i).priority;
-						}
-					}
-				} else {
-					effectivePriority = priority; 		//if no transfering effective is just the priority
-				}
-			}
 			if (priority > effectivePriority) { 
 				return priority;
 			}
@@ -334,6 +326,7 @@ public class PriorityScheduler extends Scheduler {
 				if (PriorityDonateQ.get(0).transferPriority) {
 					//calculateDonated();
 				}
+				PriorityDonateQ.get(0).sort();
 			}
 
 		}
@@ -373,12 +366,24 @@ public class PriorityScheduler extends Scheduler {
 				PriorityDonateQ.remove(0); //remove previous
 			}
 			PriorityDonateQ.add(waitQueue); //add waitQueue for priority donation
-			//TODO re sort();
+			calculateDonated();
 		}
 
 		// Calculates the donated value of priorities
 		private void calculateDonated(){
-
+			//iterate through donation queue (if sorted, then it should be the first one in queue, but this is assuming it isn't)
+			if (PriorityDonateQ.size() > 0) {
+				if (PriorityDonateQ.get(0).transferPriority) { //if transferPriority is true
+					for (int i = 0; i < PriorityDonateQ.get(0).queue.size(); ++i){ 
+						if (PriorityDonateQ.get(i).queue.get(i).priority > effectivePriority) {
+							effectivePriority = PriorityDonateQ.get(i).queue.get(i).priority;
+						}
+					}
+				} else {
+					effectivePriority = priority; 		//if no transfering effective is just the priority
+				}
+			}
+			PriorityDonateQ.get(0).sort();
 		}
 
 		public void setTimeAdded(long time){
