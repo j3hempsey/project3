@@ -321,13 +321,7 @@ public class PriorityScheduler extends Scheduler {
 			Lib.debug(dbgSch, "[D] === Setting thread priority: " + thread.toString() + " to: " + priority + " === [D]");
 			this.priority = priority;
 
-			// implement me
-			if (PriorityDonateQ.size() > 0){
-				if (PriorityDonateQ.get(0).transferPriority) {
-					//calculateDonated();
-				}
-				PriorityDonateQ.get(0).sort();
-			}
+			calculateDonated(); //set effective priority
 
 		}
 
@@ -375,15 +369,15 @@ public class PriorityScheduler extends Scheduler {
 			if (PriorityDonateQ.size() > 0) {
 				if (PriorityDonateQ.get(0).transferPriority) { //if transferPriority is true
 					for (int i = 0; i < PriorityDonateQ.get(0).queue.size(); ++i){ 
-						if (PriorityDonateQ.get(i).queue.get(i).priority > effectivePriority) {
-							effectivePriority = PriorityDonateQ.get(i).queue.get(i).priority;
+						if (PriorityDonateQ.get(0).queue.get(i).priority > effectivePriority) {
+							effectivePriority = PriorityDonateQ.get(0).queue.get(i).priority;
 						}
 					}
 				} else {
 					effectivePriority = priority; 		//if no transfering effective is just the priority
 				}
+				PriorityDonateQ.get(0).sort(); //sorts "queue" variable
 			}
-			PriorityDonateQ.get(0).sort();
 		}
 
 		public void setTimeAdded(long time){
