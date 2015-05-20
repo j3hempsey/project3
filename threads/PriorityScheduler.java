@@ -228,15 +228,17 @@ public class PriorityScheduler extends Scheduler {
 		public void sort(){
 			Lib.debug(dbgSch, "[D] === Sorting Queue === [D]");
 			if (queue.size() <= 1) return;		//the queue is only one long thus sorted
-			for (int i = queue.size() - 1; i >= 0; --i){
-				for (int j = 0; j < i; ++j){
-					if (queue.get(j).getEffectivePriority() == queue.get(j + 1).getEffectivePriority()){
-						if (queue.get(j).getTimeAdded() > queue.get(j + 1).getTimeAdded()){
-							swap(j, j+1);
+			for (int i = 0; i < queue.size() - 1; ++i){
+				for (int j = 1; j < queue.size() - i; ++j){
+					if (queue.get(j - 1).getEffectivePriority() == queue.get(j).getEffectivePriority()){
+						if (queue.get(j - 1).getTimeAdded() < queue.get(j).getTimeAdded()){
+							System.out.println("J-1: "+queue.get(j-1).thread.toString()+ " "+ queue.get(j-1).getTimeAdded());
+							System.out.println("J: "+queue.get(j).thread.toString()+ " "+ queue.get(j).getTimeAdded());
+							swap(j-1, j);
 						}
 					}
-					else if (queue.get(j).getEffectivePriority() < queue.get(j + 1).getEffectivePriority()){
-						swap(j, j+1);
+					else if (queue.get(j - 1).getEffectivePriority() < queue.get(j).getEffectivePriority()){
+						swap(j - 1, j);
 					}
 				}
 			}
@@ -245,7 +247,7 @@ public class PriorityScheduler extends Scheduler {
 			for (int i = 0; i < queue.size(); ++i)
 			{
 				Lib.debug(dbgSch, "[D] === \t" + i +") "+queue.get(i).thread.toString() 
-				+ " Priority: " +queue.get(i).getPriority() + " === [D]");
+				+ " Priority: " +queue.get(i).getPriority() + " timeAdded: " + queue.get(i).getTimeAdded() + " === [D]");
 			}
 		}
 		public int size(){
