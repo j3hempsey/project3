@@ -211,7 +211,7 @@ public class PriorityScheduler extends Scheduler {
 		}
 
 		public void addThread(ThreadState currentState){
-			Lib.debug(dbgSch, "[D] === Adding thread to PriorityQueue(0): " 
+			Lib.debug(dbgSch, "[D] === Adding thread to PriorityQueue: " 
 				+ currentState.thread.toString() + " === [D]");
 			queue.add(currentState);
 			sort();
@@ -231,9 +231,7 @@ public class PriorityScheduler extends Scheduler {
 			for (int i = 0; i < queue.size() - 1; ++i){
 				for (int j = 1; j < queue.size() - i; ++j){
 					if (queue.get(j - 1).getEffectivePriority() == queue.get(j).getEffectivePriority()){
-						if (queue.get(j - 1).getTimeAdded() < queue.get(j).getTimeAdded()){
-							System.out.println("J-1: "+queue.get(j-1).thread.toString()+ " "+ queue.get(j-1).getTimeAdded());
-							System.out.println("J: "+queue.get(j).thread.toString()+ " "+ queue.get(j).getTimeAdded());
+						if (queue.get(j - 1).getTimeAdded() > queue.get(j).getTimeAdded()){
 							swap(j-1, j);
 						}
 					}
@@ -264,21 +262,12 @@ public class PriorityScheduler extends Scheduler {
 				queue.add(q.get(i));
 			}
 		}
-
-		public void setLockedThread(KThread th){
-			lockedThread = th;
-		}
-
-		public KThread getLockedThread(){
-			return lockedThread;
-		}
 		/**
 		 * <tt>true</tt> if this queue should transfer priority from waiting
 		 * threads to the owning thread.
 		 */
 		public boolean transferPriority;
 
-		private KThread lockedThread;
 	}
 
 	/**
@@ -375,6 +364,7 @@ public class PriorityScheduler extends Scheduler {
 			Lib.assertTrue(Machine.interrupt().disabled());
 			PriorityDonateQ.add(waitQueue); //add waitQueue for priority donation
 			calculateDonated();
+			PriorityDonateQ.sort();
 		}
 
 		// Calculates the donated value of priorities
