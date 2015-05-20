@@ -324,8 +324,6 @@ public class PriorityScheduler extends Scheduler {
 				return;
 			Lib.debug(dbgSch, "[D] === Setting thread priority: " + thread.toString() + " to: " + priority + " === [D]");
 			this.priority = priority;
-
-			// implement me
 			if (PriorityDonateQ.size() > 0){
 				if (PriorityDonateQ.transferPriority) {
 					//calculateDonated();
